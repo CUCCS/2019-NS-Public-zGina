@@ -41,10 +41,14 @@
 
 * filtered port
   * ```service ssh start``` 开启 port 22
-  * ```iptables -A INPUT -p tcp --dport 22 -j REJECT```
-  * 
-    >REJECT vs DROP when using iptables 
-    DROP does nothing at all with the packet. REJECT differs to DROP that it does send a packet back, but the answer is as if a server is located on the IP, but does not have the port in a listening state.  iptables will sent a RST/ACK in case of TCP or with UDP an ICMP destination port unreachable 
+  * ```iptables -A INPUT -p tcp --dport 22 -j REJECT``` 
+  * REJECT vs DROP when using iptables
+    ```  
+    DROP does nothing at all with the packet. 
+    REJECT differs to DROP that it does send a packet back,
+    but the answer is as if a server is located on the IP,
+    but does not have the port in a listening state. 
+    iptables will sent a RST/ACK in case of TCP or with UDP an ICMP destination port unreachable 
     REJECT 默认返回 type 3,code 3 的 ICMP 包
     -A append 队尾 -I insert 默认队首 
     值得注意的是 REJECT udp 包只能是icmp ，而 tcp 两种方式都可
@@ -55,7 +59,7 @@
     iptables -I INPUT -p udp --dport 1080 -j REJECT --reject-with 
     icmp-host-unreachable/icmp-net-unreachable/icmp-host-unreachable 等
 
-    因此针对不同的 nmap 扫描方式 ：
+  因此针对不同的 nmap 扫描方式 ：
     ```DROP```可能判定为 filtered 或 closed 或 open|filtered ```REJECT```可能被判定为 closed 或 filtered 
 * closed port
   * 随便一个没监听、无服务的端口
