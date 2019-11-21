@@ -44,7 +44,7 @@
 
 - first simple goal?
 
-  - 油猴或者 chrome Dev->Sources->Snippets 中添加如下[脚本](https://stackoverflow.com/questions/13363946/how-do-i-get-an-html-comment-with-javascript)可在页面加载时在控制台列出 HTML 中所有被注释的内容
+  - 油猴或 chrome Dev->Sources->Snippets 中添加如下[脚本](https://stackoverflow.com/questions/13363946/how-do-i-get-an-html-comment-with-javascript)可在页面加载时在控制台列出 HTML 中所有注释内容
     
     ![](imgs/find_comments.png)
 
@@ -78,10 +78,12 @@
     小黑猜测是在 description 和 name 两个字段中模糊查询
   - 然后就是一通乱试加分析，当 q="'时结果如下
     ![](imgs/close.png)
+
     可以简略地下个结论：闭合 q 查询需要两个右括号。
   - 接下来 union select 就可以出来大展拳脚了`')) UNION SELECT * FROM USERS--`
     显然，Users 表和 Products 表(姑且先这么称呼着)返回的列数不同，那么将 Users 已知字段和几个虚拟列拼接起来等于 Pro 列数目即可
     ![](imgs/users.png)
+
     `helloSQL')) UNION SELECT email,password,deletedAt,1,2,3,4,5 FROM USERS--`
     但这样因为某些`deleteAt`字段会返回 NULL 值，在网站后续一些处理中会报错(具体先不研究了)，于是去掉该字段，小黑得到 Users 表的 email 和 password
     ![](imgs/json_users.png)
@@ -112,6 +114,7 @@
     - 数据库处理要求权限
     - 操作失败时，不要将原始错误日志返回，而是统一报错
     - **参数化 SQL 查询**
+    
       详情见 [为什么参数化 SQL 查询可以防止 SQL 注入?](https://www.zhihu.com/question/52869762)
     - 本来可以写好多点的但是有了上面的「参数化，预编译」 **好像**其他的都不需要了
 
@@ -123,7 +126,7 @@
 
 - ① 数据收集
   收集大量 juice shop 用户的信息以提高钓鱼成功率
-  - ~~爬取商品的 review 区用户的账号及评论~~ 根据 API `/rest/products/$id$/reviews`得到用户 email 及其喜好 (社会工程学 233
+  - ~~爬取商品的 review 区用户的账号及评论~~ 根据 API `/rest/products/$id$/reviews`得到用户 email 及其喜好 (社会工程学 233)
     发送免费果汁链接的邮件到用户 email
   - 评论区内容内联了，下面两种方式意义不大
     - 在评论区少量留言 `free juice` 链接，定向至劫持用户 cookie 或钓鱼界面
@@ -138,7 +141,10 @@
     ![](imgs/fail_ref_xss.png)
 
     - 解决
-      可以注入数据或能执行 script 的内联元素如：`<img src=x onerror=alert('XSS');>`，`<select onfocus=javascript:alert(1) autofocus>`，`video,math`等等等等 或 `` <iframe src="javascript:alert(`xss`)"> ``最终实现的是较特殊的 DOM-xss
+      可以注入数据或能执行 script 的内联元素如：
+      
+      `<img src=x onerror=alert('XSS');>`，`<select onfocus=javascript:alert(1) autofocus>`，`video,math`等等等等 或 `` <iframe src="javascript:alert(`xss`)"> ``
+      最终实现的是较特殊的 DOM-xss
 
     - reference：
 
@@ -149,7 +155,8 @@
   - 答案又骗小黑之 `reflected XSS`
     - 在`track-order`页面参考答案说输入`` <iframe src="javascript:alert(`xss`)"> ``就能回显，实现反射型 xss，但很显然这里几乎所有特殊字符都被过滤了
       ![](imgs/special.gif)
-    - 机缘巧合之下，小黑一直在`由源码 npm start`，`docker拉取`和[线上平台](https://juice-shop.herokuapp.com/) 三个 juice shop 玩耍。发现，通过`npm start`启动时确实能实现 reflected xss 并显示以下友好提示 : `unavailable on Docker` 具体原因未知。(两个本地运行的 score-board 实现数据居然是同步的，即使端口相同(其实是改端口改失败了，怎么着都是 3000)也不冲突，但是会按启动顺序决定，只能进入先运行的那个)
+    - 机缘巧合之下，小黑一直在`由源码 npm start`，`docker拉取`和[线上平台](https://juice-shop.herokuapp.com/) 三个 juice shop 玩耍。发现，通过`npm start`启动时确实能实现 reflected xss 并显示以下友好提示 : `unavailable on Docker` 具体原因未知。
+    (两个本地运行的 score-board 实现数据居然是同步的，即使端口相同(其实是改端口改失败了，怎么着都是 3000)也不冲突，但是会按启动顺序决定，只能进入先运行的那个)
       ![](imgs/docker_unavailable.png)
   - 以上，小黑通过 `search?q=` 和`track-order?id=`两种不同的 query 逻辑而得到的不同类型 XSS：
     - DOM XSS : 数据已经通过一次查询到达前端，此类注入语句只是由 js 处理，永远不会到达后端。相比之下，DOM XSS 存在更广泛；不会经过后端严格的过滤，更易 passby
@@ -159,6 +166,7 @@
       ![](imgs/ptag.png)
     - 改用 HTML 编码同时闭合`<p>`试图绕过：`</p>&#x3C;img src=&#x22;1&#x22; onerror=&#x22;alert(1)&#x22;&#x3E;`
       ![](imgs/double_quote.png)
+
       发现被加了双引号，这里无法绕过了，因为注入的内容处于`<text>`字段。应该是采用了 jQuery.text()进行转义。该方法是完全 XSS 安全的
     - 接下来试图上传用户头像文件注入
       1. 检测文件允许类型，过滤得很稳当。严格要求图像格式，svg 也不行。
@@ -191,6 +199,7 @@
 ### 脆弱认证和会话管理
 
 现在假设小黑经上一步已经拿到了一部分用户 email 信息：
+
 jim@juice-sh.op，admin@juice-sh.op，morty@juice-sh.op，mc.safesearch@juice-sh.op，bender@juice-sh.op
 
 bjoern 很高冷，不评论，不通过 sql 注入要拿到 bjoern@juice-sh.op 账户还挺麻烦的
@@ -206,9 +215,9 @@ bjoern 很高冷，不评论，不通过 sql 注入要拿到 bjoern@juice-sh.op 
     ![](imgs/jim.png)
 
 - 脆弱的`CAPTCHA`：① 没有有效期，通过一次可多次重放 ② 问题过于简单，可枚举 ③ 甚至访问页面时请求 captcha 直接返回了所有数据
+
   ![](imgs/captcha.png)
   - 解决：re-CAPTCHA 
----
 - 典例
   - 未采用 session cookie，而在 url 中编码已通过认证的用户名和密码
   - 脆弱用户名及其口令
