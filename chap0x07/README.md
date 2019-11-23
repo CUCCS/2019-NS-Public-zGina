@@ -1,6 +1,6 @@
 # Web 应用漏洞攻防
 
-后来，老黑想起来他年少时在黑暗中一次又一次的摸索，在夕阳下的奔跑，那个傻乎乎地拿着工具乱扫的 Script kiddie，
+后来，老黑想起来他还是小黑时在疑惑中一次又一次的摸索，那个傻乎乎地拿着工具乱扫的 Script kiddie，嘴角不禁浮起一阵满怀爱意的微笑。
 
 ## 实验目的
 
@@ -16,7 +16,7 @@
 
 ## 实验要求
 
-- [x] 每个实验环境完成不少于 **5** 种不同漏洞类型的漏洞利用练习；
+- [x] 每个实验环境完成不少于 **5** 种不同漏洞类型的漏洞利用练习；(强行打钩 233)
 - [x] （可选）使用不同于官方教程中的漏洞利用方法完成目标漏洞利用练习；
 - [ ] （可选）**最大化** 漏洞利用效果实验；
 - [ ] （可选）编写 **自动化** 漏洞利用脚本完成指定的训练项目；
@@ -24,10 +24,6 @@
 - [ ] （可选）尝试从源代码层面修复漏洞；
 
 ## 实验过程
-
-### 未验证的用户输入
-
-### 缓冲区溢出
 
 ### juice shop
 
@@ -43,7 +39,7 @@
 
   ***
 
-小黑先来到橘子商店的世界，差点被`score-board`就劝退了。参考书说`href="#/score-board` 就隐藏在 HTML 的注释里，很容易被发现。然而，为此：
+小黑先来到果汁商店的世界，差点被`score-board`就劝退了。参考书说`href="#/score-board` 就隐藏在 HTML 的注释里，很容易被发现。然而，为此：
 
 - first simple goal?
 
@@ -251,11 +247,14 @@ bjoern 很高冷，不评论，不通过 sql 注入要拿到 bjoern@juice-sh.op 
   - xss 中已经尝试过
 - /complain
 - /photo-wall
+
   - 以上两个较为相似，一个是绕过文件小于 100kb，一个是绕过文件限制 zip，pdf 格式。原因都是前端限制有漏洞。在 postman 中修改包数据发送即可
-  
+
     ![](imgs/mime.png)
 
 ### WebGoat
+
+webgoat 一点不可爱的界面让小黑有点窒息
 
 #### 脆弱认证和会话管理
 
@@ -263,7 +262,7 @@ bjoern 很高冷，不评论，不通过 sql 注入要拿到 bjoern@juice-sh.op 
 
 该网站使用了 eval('balabala') 来显示用户操作成功的提示，非常危险：
 
-使用`');alert(document.cookie);'(`前后闭合
+使用`');alert(document.cookie);'(`前后闭合即可弹窗用户 cookie
 
 #### 不安全的存储
 
@@ -348,9 +347,18 @@ bjoern 很高冷，不评论，不通过 sql 注入要拿到 bjoern@juice-sh.op 
 
 #### 第三方程序漏洞
 
+#### 未验证的用户输入
+
+#### 缓冲区溢出
+
 ## 心得
 
 - 要清楚每个 API 接口返回的数据类型，猜测&验证在后台&前端做了哪些处理
 - XXX attack scenarios 是个很好的关键词
-- 想做的太多不能乱，要分清主次
-- 注意把各个漏洞串起来前推后 后引前
+- 分析要分清主次，注意把各个漏洞串起来前推后，后引前
+
+## reference
+
+- [Pwning OWASP Juice Shop](https://bkimminich.gitbooks.io/pwning-owasp-juice-shop/content/)
+- [5 Practical Scenarios for XSS Attacks](https://pentest-tools.com/blog/xss-attacks-practical-scenarios/)
+- [what-could-an-img-src-xss-do](https://security.stackexchange.com/questions/135513/what-could-an-img-src-xss-do)
