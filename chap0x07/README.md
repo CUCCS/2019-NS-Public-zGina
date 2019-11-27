@@ -134,7 +134,7 @@
 
   发送免费果汁链接的钓鱼邮件到用户 email
 
-- 评论区内容内联了，下面两种方式意义不大
+- 评论区内容内联了（也即是说并没有提供这样一个功能：点进他人个人页面），下面两种方式意义不大
   - 在评论区少量留言 `free juice` 链接，定向至劫持用户 cookie 或钓鱼界面
   - 在自己的 profile 注入 xss，留下吸睛的评论使人点进小黑 profile
 
@@ -162,9 +162,11 @@
 - 答案又骗小黑之 `reflected XSS`
   - 在`track-order`页面参考答案说输入`` <iframe src="javascript:alert(`xss`)"> ``就能回显，实现反射型 xss，但很显然这里几乎所有特殊字符都被过滤了
     ![](imgs/special.gif)
-  - 机缘巧合之下，小黑一直在`由源码 npm start`，`docker拉取`和[线上平台](https://juice-shop.herokuapp.com/) 三个 juice shop 玩耍。发现，通过`npm start`启动时确实能实现 reflected xss 并显示以下友好提示 : `unavailable on Docker` ，为何不可用具体原因未知。
-    (两个本地运行的 score-board 实现数据居然是同步的，即使端口相同(其实是改端口改失败了，怎么着都是 3000)也不冲突，但是会按启动顺序决定，只能进入先运行的那个)
+  - 机缘巧合之下，小黑一直在`由源码 npm start`，`docker拉取`和[线上平台](https://juice-shop.herokuapp.com/) 三个 juice shop 玩耍。发现，通过`npm start`启动时确实能实现该 reflected xss 并显示以下友好提示 : `unavailable on Docker` ，为何不可用具体原因未知。
     ![](imgs/docker_unavailable.png)
+    - 根据官方资料看，某些 XXE 若攻击 Docker 底层的 `XML parser`会导致进程`Segmentation Fault`错误，所以关闭了相关 XXE 漏洞，不知这里 XSS unavailable 是否也是类似原因。
+    - 两个本地运行的 score-board 实现数据居然是同步的，~~即使端口相同也不冲突，但是会按启动顺序决定，只能进入先运行的那个~~ 这肯定是我当时失了智没有注意到某些细节或者电脑又出现的玄学问题，这个现象无法重现了。按理来说也是不可能的。至于score-board数据相同是因为cookie`continueCode`未被清除，而我还以为是在后端某处有共用一个存储。
+           
 - 以上，小黑通过 `search?q=` 和`track-order?id=`两种不同的 query 逻辑而得到的不同类型 XSS：
   - DOM XSS : 数据已经通过一次查询到达前端，此类注入语句只是由 js 处理，永远不会到达后端。相比之下，DOM XSS 存在更广泛；不会经过后端严格的过滤，更易 passby
   - reflected XSS：多了个到达后端的行为
@@ -177,6 +179,8 @@
 
     发现被加了双引号，这里无法绕过了，因为注入的内容处于`<text>`字段。应该是采用了 jQuery.text()进行转义。该方法是完全 XSS 安全的
 
+  - 关于`persisted XSS`以上推断有严重错误,首先：①反斜杠“\”并非是用来转义的②xss过滤并不是过滤`<>`字符，与需要HTML编码也没什么关系③绕过`<p>`tag不需要闭合，其内是可以执行script脚本的
+    - 多试几次会发现(没有从源码找到)：username过滤方式实际上是将出现的第一个`<d+@`（其中@指任意一个特殊字符，包括`空格，!#$%^>`等,包括`<`）及其他后面的第一个字符替换为空。那么只要在`<script>`中间插入一个这样的格式如`<<233>Xscript>alert(`xss`)</script>`，被滤过之后，剩下`<script>`即可。
   - 接下来试图上传用户头像文件注入
     1. 检测文件允许类型，过滤得很稳当。严格要求图像格式，svg 也不行。
     2. 尝试文件名改为`svg /onload=alert(1).jpg`，但被后台重命名了。弱点是命名非常有规律，随便就能无聊地试出前面用户的头像以及猜测 images 路径的同级文件夹
