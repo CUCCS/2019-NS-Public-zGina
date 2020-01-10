@@ -129,9 +129,8 @@ use cowrie;
 source ./mysql.sql;
 exit
 ```
-
 结果如下,它们初始均为空
-![]()
+![](imgs/mysql.png)
 
 ```
 # 重启服务
@@ -262,11 +261,10 @@ tty 输入的记录可在`input`表查看：
     ![](imgs/ping.png)
 - apt-get  
   一个显然不存在的包成功install
+
   ![](imgs/aptget.png)
-- 任何 cowrie 支持的指令,输入错误参数不报错
+
   
-
-
 ### reference
 
 - [man-port-scanning-techniques](https://nmap.org/book/man-port-scanning-techniques.html)
